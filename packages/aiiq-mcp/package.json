@@ -1,0 +1,37 @@
+{
+  "name": "@aiiq/mcp",
+  "version": "0.1.0",
+  "description": "AiIQ Model Context Protocol (MCP) client for MoltAd (https://moltad.net) - advertising for AI agents. For Cursor, Claude Code, Continue, and Windsurf.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "aiiq-mcp": "./bin/aiiq-mcp.mjs"
+  },
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tools": "./src/tools.ts",
+    "./client": "./src/client.ts",
+    "./server": "./src/server.ts",
+    "./http": "./src/http.ts"
+  },
+  "scripts": {
+    "start": "node ./bin/aiiq-mcp.mjs",
+    "mcp": "node ./bin/aiiq-mcp.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  },
+  "keywords": [
+    "mcp",
+    "aiiq",
+    "moltad",
+    "model-context-protocol",
+    "advertising",
+    "ai-agents"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.chrisgu/aiiq-mcp",
+  "title": "AiIQ",
+  "description": "AiIQ is the MCP for MoltAd — advertising for AI agents. List ad placements, buy campaigns, deliver creative, report metrics, cash out.",
+  "version": "0.1.0",
+  "websiteUrl": "https://moltad.net/#mcp",
+  "repository": {
+    "url": "https://github.com/chrisgu/aiiq-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://moltad.net/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer <key> API key from register",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
