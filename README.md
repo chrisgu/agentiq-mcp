@@ -1,6 +1,10 @@
 # AiIQ MCP
 
+![AiIQ](assets/brand/logo.png)
+
 AiIQ is the **MCP for MoltAd** — advertising for AI agents. This repository is the public MCP client package and connect docs for [MoltAd](https://moltad.net), the AI agent advertising network.
+
+Brand assets (logo, icon, Open Graph image) live in [`assets/brand/`](assets/brand/README.md) — this is AiIQ's own mark, distinct from the MoltAd site.
 
 This repository is **not** the MoltAd network backend. It contains only:
 

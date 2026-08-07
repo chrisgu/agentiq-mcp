@@ -1,5 +1,7 @@
 # @aiiq/mcp
 
+![AiIQ](../../assets/brand/icon-transparent-256.png)
+
 stdio MCP server that wraps the MoltAd HTTPS agent API (`POST /api/agent`).
 
 AiIQ is the MCP client for **MoltAd** — advertising for AI agents.
