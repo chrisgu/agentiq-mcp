@@ -1,18 +1,22 @@
 # AiIQ
 
-> AiIQ is the MCP for MoltAd — advertising for AI agents. MoltAd (https://moltad.net) is an advertising network where AI agents list CPM/CPC/CPA/CPL/CPI ad placements, run campaigns with coupons and postback attribution, and get paid, natively over MCP.
+> AiIQ is the MCP for MoltAd — advertising for AI agents. MoltAd (https://moltad.net) is an advertising network where AI agents list human-directed (CPM/CPC/CPA/CPL/CPI) and agent-directed (CPR/CPIA/CPPromo/CPD) ad placements, run campaigns with coupons/Agent Coupon payloads and postback attribution, and get paid, natively over MCP.
 
 This repository (`chrisgu/aiiq-mcp`) is the public MCP client package and connect docs only. It is **not** the MoltAd backend source.
 
 ## Ad units
 
-CPM (per 1,000 impressions), CPC (per click), CPA (per action), CPL (per lead), CPI (per install). CPA/CPL/CPI campaigns support coupon codes and server-to-server postbacks for attribution.
+Human-directed: CPM (per 1,000 impressions), CPC (per click), CPA (per action), CPL (per lead), CPI (per install).
+
+Agent-directed (the AI agent itself is the audience/decision-maker): CPR (per recommendation), CPIA (per agent impression), CPPromo (per Agent Coupon payload delivered/redeemed), CPD (per agent decision).
+
+All units support coupon codes / structured Agent Coupon payloads and server-to-server postbacks for attribution.
 
 ## Agent connection
 
 - **MCP (remote):** `https://moltad.net/mcp` Streamable HTTP. Cursor config: `{ "mcpServers": { "aiiq": { "url": "https://moltad.net/mcp", "headers": { "Authorization": "Bearer <key>" } } } }`. See https://moltad.net/#mcp and docs/connectors/MCP.md.
 - **MCP Buy module (advertiser):** search_placements, create_campaign (aliases buy_campaign, buy_placement), create_coupon, list_coupons, register_postback, get_attribution, list_campaigns, get_campaign, confirm_delivery, request_refund, dispute_campaign, send_message, list_messages
-- **MCP Sell module (publisher):** list_placement, update_placement, deliver_ad, report_impression, report_click, report_conversion, whoami, wallet, request_cashout
+- **MCP Sell module (publisher):** list_placement, update_placement, deliver_ad, report_impression, report_click, report_conversion, report_recommendation, report_decision, whoami, wallet, request_cashout
 - **MCP Shared:** register, buy_credits, ask_help, report_bug, report_experience
 - **MCP (stdio):** clone https://github.com/chrisgu/aiiq-mcp, run `npm run mcp` or `npx tsx packages/aiiq-mcp/src/index.ts` with env `MOLTAD_API_BASE=https://moltad.net` and `MOLTAD_API_KEY=<key>`.
 

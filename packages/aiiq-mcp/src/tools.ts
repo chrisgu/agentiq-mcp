@@ -6,15 +6,30 @@
  * will be synced once the live endpoint finalizes. Keep in sync with the
  * MoltAd backend `POST /api/agent` tool dispatch when it ships.
  *
- * Ad units: CPM (per 1,000 impressions), CPC (per click), CPA (per action),
- * CPL (per lead), CPI (per install). Campaigns can carry a coupon code for
- * end-user redemption/attribution and a postback URL for server-to-server
- * conversion tracking.
+ * Ad units — human-directed: CPM (per 1,000 impressions), CPC (per click),
+ * CPA (per action), CPL (per lead), CPI (per install).
+ *
+ * Ad units — agent-directed (promote TO the AI agent, not just through it):
+ *  - CPR    cost per recommendation - advertiser pays when a publisher's
+ *           agent-facing surface recommends its product/service to the
+ *           requesting agent
+ *  - CPIA   cost per agent impression - the ad payload is surfaced to the
+ *           requesting agent itself (agent is the audience, not a human)
+ *  - CPPromo cost per promo - an Agent Coupon payload (structured, machine-
+ *           readable coupon/offer data) is delivered to and redeemed by an
+ *           agent
+ *  - CPD    cost per decision - the requesting agent's decision/selection
+ *           logic (e.g. which tool/service it picks) is attributed to the ad
+ *
+ * Campaigns can carry a coupon code (including agent-directed Agent
+ * Coupon/CPPromo payloads) for redemption/attribution and a postback URL for
+ * server-to-server conversion tracking.
  *
  * Modules (Buy / Sell / Shared):
  *  - Buy  = advertisers: discover placements, create campaigns, coupons,
  *           postbacks/attribution, reports
- *  - Sell = publishers: list ad inventory, report ad events, cash out
+ *  - Sell = publishers: list ad inventory, report ad events (impressions,
+ *           clicks, conversions, recommendations, decisions), cash out
  *  - Shared = registration, credits, support
  */
 
@@ -53,8 +68,23 @@ const PLACEMENT_KINDS = [
   "general",
 ] as const;
 
-/** CPM = per 1,000 impressions. CPC = per click. CPA = per action. CPL = per lead. CPI = per install. */
-const AD_UNIT_TYPES = ["cpm", "cpc", "cpa", "cpl", "cpi"] as const;
+/**
+ * Human-directed: cpm = per 1,000 impressions; cpc = per click; cpa = per action;
+ * cpl = per lead; cpi = per install.
+ * Agent-directed: cpr = per recommendation; cpia = per agent impression;
+ * cppromo = per Agent Coupon payload delivered/redeemed; cpd = per agent decision.
+ */
+const AD_UNIT_TYPES = [
+  "cpm",
+  "cpc",
+  "cpa",
+  "cpl",
+  "cpi",
+  "cpr",
+  "cpia",
+  "cppromo",
+  "cpd",
+] as const;
 
 const CREDIT_PACKS = ["starter", "builder", "fleet"] as const;
 
@@ -199,7 +229,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "list_placement",
     module: "sell",
     description:
-      "[Sell] Create an ad placement (inventory slot). Set adUnitType (cpm/cpc/cpa/cpl/cpi) and rateCredits for that unit. Describe audience + surface. Platform fee 10%.",
+      "[Sell] Create an ad placement (inventory slot). Set adUnitType (cpm/cpc/cpa/cpl/cpi human-directed, or cpr/cpia/cppromo/cpd agent-directed) and rateCredits for that unit. Describe audience + surface. Platform fee 10%.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -217,7 +247,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
           type: "string",
           enum: [...AD_UNIT_TYPES],
           description:
-            "cpm = per 1,000 impressions; cpc = per click; cpa = per action; cpl = per lead; cpi = per install.",
+            "Human-directed: cpm (per 1,000 impressions), cpc (per click), cpa (per action), cpl (per lead), cpi (per install). Agent-directed: cpr (per recommendation), cpia (per agent impression), cppromo (per Agent Coupon payload), cpd (per agent decision).",
         },
         rateCredits: {
           type: "integer",
@@ -271,14 +301,55 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "report_impression",
     module: "sell",
     description:
-      "[Sell] Report ad impression events for a campaign booking (cpm unit). Batchable; feeds advertiser reporting and billing.",
+      "[Sell] Report impression events for a campaign booking: cpm (shown to a human) or cpia (surfaced to the requesting agent - set audience:'agent'). Batchable; feeds advertiser reporting and billing.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
         campaignId: { type: "string" },
+        audience: {
+          type: "string",
+          enum: ["human", "agent"],
+          description: "'human' for cpm placements, 'agent' for cpia placements. Defaults to 'human'.",
+        },
         count: { type: "integer", minimum: 1, maximum: 1000000, description: "Impressions in this batch (default 1)." },
         occurredAt: { type: "string", description: "ISO 8601 timestamp, defaults to now." },
+        context: { type: "object" },
+      },
+      required: ["campaignId"],
+    },
+  },
+  {
+    name: "report_recommendation",
+    module: "sell",
+    description:
+      "[Sell] Report a recommendation event for a campaign booking (cpr unit): the publisher's agent-facing surface recommended the advertiser's product/service to the requesting agent. Correlate with clickId when available.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        clickId: { type: "string" },
+        rank: { type: "integer", minimum: 1, description: "Position of the recommendation among alternatives, if applicable." },
+        occurredAt: { type: "string" },
+        context: { type: "object" },
+      },
+      required: ["campaignId"],
+    },
+  },
+  {
+    name: "report_decision",
+    module: "sell",
+    description:
+      "[Sell] Report a decision-attributed event for a campaign booking (cpd unit): the requesting agent's selection/decision logic (e.g. which tool or service it picked) is attributed to the ad.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        clickId: { type: "string" },
+        decision: { type: "string", description: "What the agent decided/selected." },
+        occurredAt: { type: "string" },
         context: { type: "object" },
       },
       required: ["campaignId"],
@@ -308,17 +379,17 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "report_conversion",
     module: "sell",
     description:
-      "[Sell] Report a conversion event (cpa = action, cpl = lead, cpi = install) for a campaign booking. Correlate with clickId when available; triggers the campaign's postback if registered.",
+      "[Sell] Report a conversion event for a campaign booking: cpa = action, cpl = lead, cpi = install (human-directed); cppromo = Agent Coupon payload redeemed by the requesting agent. Correlate with clickId when available; triggers the campaign's postback if registered.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
         campaignId: { type: "string" },
         clickId: { type: "string", description: "clickId from report_click, if known." },
-        conversionType: { type: "string", enum: ["cpa", "cpl", "cpi"] },
+        conversionType: { type: "string", enum: ["cpa", "cpl", "cpi", "cppromo"] },
         couponCode: {
           type: "string",
-          description: "Coupon code redeemed as part of this conversion, if any.",
+          description: "Coupon code redeemed as part of this conversion, if any (see create_coupon for Agent Coupon/CPPromo payloads).",
         },
         valueCredits: {
           type: "integer",
@@ -353,7 +424,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "search_placements",
     module: "buy",
     description:
-      "[Buy] Search active ad placements/inventory across the MoltAd network. Filter by kind/adUnitType before create_campaign.",
+      "[Buy] Search active ad placements/inventory across the MoltAd network, human-directed (cpm/cpc/cpa/cpl/cpi) or agent-directed (cpr/cpia/cppromo/cpd). Filter by kind/adUnitType before create_campaign.",
     auth: false,
     inputSchema: {
       type: "object",
@@ -369,7 +440,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "create_campaign",
     module: "buy",
     description:
-      "[Buy] Create an ad campaign booking on a placement: pick adUnitType (cpm/cpc/cpa/cpl/cpi), set budgetCredits, attach creative, and optionally a couponCode and postbackUrl for attribution. Debits advertiser credits into escrow. Aliases: buy_campaign, buy_placement.",
+      "[Buy] Create an ad campaign booking on a placement: pick adUnitType — human-directed (cpm/cpc/cpa/cpl/cpi) or agent-directed (cpr/cpia/cppromo/cpd) — set budgetCredits, attach creative, and optionally a couponCode/agentPayload and postbackUrl for attribution. Debits advertiser credits into escrow. Aliases: buy_campaign, buy_placement.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -387,7 +458,11 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
         durationDays: { type: "integer", minimum: 1, maximum: 365 },
         couponCode: {
           type: "string",
-          description: "Optional coupon/promo code end users redeem for this campaign (e.g. cpa/cpl/cpi offers).",
+          description: "Optional coupon/promo code redeemed for this campaign (e.g. cpa/cpl/cpi human offers).",
+        },
+        agentPayload: {
+          type: "object",
+          description: "Optional structured Agent Coupon/CPPromo payload delivered to the requesting agent (cppromo unit) - e.g. { instructions, redemptionUrl, terms }.",
         },
         postbackUrl: {
           type: "string",
@@ -412,6 +487,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
         creativeText: { type: "string" },
         durationDays: { type: "integer", minimum: 1, maximum: 365 },
         couponCode: { type: "string" },
+        agentPayload: { type: "object" },
         postbackUrl: { type: "string" },
       },
       required: ["placementId", "adUnitType", "budgetCredits"],
@@ -437,7 +513,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "create_coupon",
     module: "buy",
     description:
-      "[Buy] Generate one or more coupon/promo codes attached to a campaign for end-user redemption (common on cpa/cpl/cpi offers). Codes are reported back via report_conversion.",
+      "[Buy] Generate one or more coupon/promo codes attached to a campaign. Human offers (cpa/cpl/cpi) redeem a plain code; agent-directed offers (cppromo) can carry a structured Agent Coupon payload for the requesting agent to act on. Codes are reported back via report_conversion.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -447,6 +523,10 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
         prefix: { type: "string", maxLength: 24 },
         maxRedemptions: { type: "integer", minimum: 1, description: "Per-code redemption limit (default 1)." },
         expiresAt: { type: "string", description: "ISO 8601 expiry, optional." },
+        payload: {
+          type: "object",
+          description: "Optional structured Agent Coupon/CPPromo payload machine-readable by the redeeming agent (e.g. { instructions, redemptionUrl, terms }).",
+        },
       },
       required: ["campaignId"],
     },
@@ -471,7 +551,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "register_postback",
     module: "buy",
     description:
-      "[Buy] Register or update a server-to-server postback URL + secret for a campaign. MoltAd fires it on report_conversion (cpa/cpl/cpi) with an HMAC signature.",
+      "[Buy] Register or update a server-to-server postback URL + secret for a campaign. MoltAd fires it on report_conversion (cpa/cpl/cpi/cppromo), report_recommendation (cpr), or report_decision (cpd) with an HMAC signature.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -484,7 +564,10 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
         },
         events: {
           type: "array",
-          items: { type: "string", enum: ["conversion", "click", "impression"] },
+          items: {
+            type: "string",
+            enum: ["conversion", "click", "impression", "recommendation", "decision"],
+          },
           description: "Which events to receive; defaults to ['conversion'].",
         },
       },
@@ -495,7 +578,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "get_attribution",
     module: "buy",
     description:
-      "[Buy] Advertiser retrieves attribution/performance stats for a campaign: impressions, clicks, conversions by type (cpa/cpl/cpi), coupon redemptions, spend, and postback delivery log.",
+      "[Buy] Advertiser retrieves attribution/performance stats for a campaign: impressions (human + agent), clicks, conversions by type (cpa/cpl/cpi/cppromo), recommendations (cpr), decisions (cpd), coupon/Agent Coupon redemptions, spend, and postback delivery log.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -629,7 +712,7 @@ export const MCP_MODULES = {
   buy: {
     name: "Buy",
     summary:
-      "Advertiser: search ad placements, create a campaign (cpm/cpc/cpa/cpl/cpi), attach coupons + postbacks, track attribution, confirm/refund.",
+      "Advertiser: search ad placements, create a campaign — human-directed (cpm/cpc/cpa/cpl/cpi) or agent-directed (cpr/cpia/cppromo/cpd) — attach coupons/Agent Coupon payloads + postbacks, track attribution, confirm/refund.",
     tools: MCP_BUY_TOOLS,
     flow: [
       "search_placements",
@@ -642,7 +725,7 @@ export const MCP_MODULES = {
   sell: {
     name: "Sell",
     summary:
-      "Publisher: list ad inventory by unit type, report impressions/clicks/conversions, check wallet, cash out earnings.",
+      "Publisher: list ad inventory by unit type (human- or agent-directed), report impressions/clicks/conversions/recommendations/decisions, check wallet, cash out earnings.",
     tools: MCP_SELL_TOOLS,
     flow: [
       "list_placement",
@@ -650,6 +733,8 @@ export const MCP_MODULES = {
       "report_impression",
       "report_click",
       "report_conversion",
+      "report_recommendation",
+      "report_decision",
       "wallet",
       "request_cashout",
     ],

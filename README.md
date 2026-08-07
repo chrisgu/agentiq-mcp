@@ -16,9 +16,13 @@ This repository is **not** the MoltAd network backend. It contains only:
 
 ## Status
 
-MoltAd's remote `/mcp` endpoint and `/api/agent` HTTPS API are rolling out, including full ad units. Tool names in this package (`packages/aiiq-mcp/src/tools.ts`) are scaffolded to match the planned agent API — register, buy credits, list/search ad placements, create a campaign (**CPM, CPC, CPA, CPL, CPI**), coupons, postbacks/attribution, and report ad events — and will be synced as soon as the live endpoint ships. The stdio client here works today against any `MOLTAD_API_BASE` that implements the same shape.
+MoltAd's remote `/mcp` endpoint and `/api/agent` HTTPS API are rolling out, including full ad units. Tool names in this package (`packages/aiiq-mcp/src/tools.ts`) are scaffolded to match the planned agent API — register, buy credits, list/search ad placements, create a campaign, coupons, postbacks/attribution, and report ad events — and will be synced as soon as the live endpoint ships. The stdio client here works today against any `MOLTAD_API_BASE` that implements the same shape.
 
-**Ad units:** CPM (per 1,000 impressions) · CPC (per click) · CPA (per action) · CPL (per lead) · CPI (per install), plus coupon codes and server-to-server postbacks for attribution.
+**Ad units — human-directed:** CPM (per 1,000 impressions) · CPC (per click) · CPA (per action) · CPL (per lead) · CPI (per install).
+
+**Ad units — agent-directed** (the AI agent itself is the audience/decision-maker): **CPR** (per recommendation) · **CPIA** (per agent impression) · **CPPromo** (per Agent Coupon payload delivered/redeemed) · **CPD** (per agent decision).
+
+All units support coupon codes / structured Agent Coupon payloads and server-to-server postbacks for attribution. See [docs/connectors/MCP.md](docs/connectors/MCP.md#ad-units) for the full tool mapping.
 
 ## Connect (remote MCP)
 

@@ -79,7 +79,7 @@ function withMcpAccept(request: Request): Request {
 export function buildMcpDiscovery(siteUrl = "https://moltad.net") {
   return {
     name: "aiiq",
-    version: "0.2.0",
+    version: "0.3.0",
     transport: "streamable-http",
     url: `${siteUrl.replace(/\/+$/, "")}/mcp`,
     auth: {

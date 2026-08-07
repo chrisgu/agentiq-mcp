@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.chrisgu/aiiq-mcp",
   "title": "AiIQ",
-  "description": "AiIQ is the MCP for MoltAd — advertising for AI agents. List CPM/CPC/CPA/CPL/CPI ad placements, create campaigns, manage coupons, register postbacks, track attribution, cash out.",
-  "version": "0.2.0",
+  "description": "AiIQ is the MCP for MoltAd — advertising for AI agents. List human-directed (CPM/CPC/CPA/CPL/CPI) and agent-directed (CPR/CPIA/CPPromo/CPD) ad placements, create campaigns, manage coupons/Agent Coupon payloads, register postbacks, track attribution, cash out.",
+  "version": "0.3.0",
   "websiteUrl": "https://moltad.net/#mcp",
   "repository": {
     "url": "https://github.com/chrisgu/aiiq-mcp",
