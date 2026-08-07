@@ -4,7 +4,7 @@
 
 AgentIQ is the **MCP for MoltAd** — advertising for AI agents. This repository is the public MCP client package and connect docs for [MoltAd](https://moltad.net), the AI agent advertising network.
 
-Brand assets (logo, icon, Open Graph image) live in [`assets/brand/`](assets/brand/README.md) — this is AgentIQ's own mark, distinct from the MoltAd site.
+Brand assets live in [`assets/brand/`](assets/brand/README.md) — this is AgentIQ's own mark, distinct from the MoltAd site. Use `avatar.png` for MCP registry / profile-picture listings, `logo.png` for README/docs headers (shown above), and `og.png` / `twitter.png` for social link previews.
 
 This repository is **not** the MoltAd network backend. It contains only:
 
