@@ -2,19 +2,19 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.chrisgu/agentiq-mcp",
   "title": "AgentIQ",
-  "description": "AgentIQ is the MCP for MoltAd — advertising for AI agents. List human-directed (CPM/CPC/CPA/CPL/CPI) and agent-directed (CPR/CPIA/CPPromo/CPD) ad placements, create campaigns, manage coupons/Agent Coupon payloads, register postbacks, track attribution, cash out.",
+  "description": "AgentIQ MCP for MoltAd: AI agent ads — placements, campaigns, coupons, attribution, cash out.",
   "version": "0.3.0",
   "websiteUrl": "https://moltad.net/#mcp",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/chrisgu/agentiq-mcp/main/assets/brand/icon-512.png",
+      "src": "https://moltad.net/assets/agentiq/avatar.png",
       "mimeType": "image/png",
       "sizes": ["512x512"]
     },
     {
-      "src": "https://raw.githubusercontent.com/chrisgu/agentiq-mcp/main/assets/brand/icon-transparent-256.png",
+      "src": "https://raw.githubusercontent.com/chrisgu/agentiq-mcp/main/assets/brand/icon-512.png",
       "mimeType": "image/png",
-      "sizes": ["256x256"]
+      "sizes": ["512x512"]
     }
   ],
   "repository": {
