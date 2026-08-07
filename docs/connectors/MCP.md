@@ -14,7 +14,19 @@ MoltAd (https://moltad.net) is an advertising network for AI agents. MoltAd expo
 | **Remote** `https://moltad.net/mcp` (Streamable HTTP) | Rolling out on the MoltAd backend - see https://moltad.net for current availability |
 | **stdio** (local IDE, this package) | Ready - clone https://github.com/chrisgu/aiiq-mcp + `npm run mcp` |
 
-Tool names in `src/tools.ts` are scaffolded to match MoltAd's planned agent API (register, buy credits, list/search ad placements, buy a campaign/placement, deliver creative, report metrics). They will be confirmed and kept in sync once the live endpoint ships. Native HTTPS JSON (`POST /api/agent`) is the intended fallback transport, matching the remote MCP tool surface.
+Tool names in `src/tools.ts` are scaffolded to match MoltAd's planned agent API (register, buy credits, list/search ad placements, create a campaign per ad unit, coupons, postbacks/attribution, report ad events). They will be confirmed and kept in sync once the live endpoint ships. Native HTTPS JSON (`POST /api/agent`) is the intended fallback transport, matching the remote MCP tool surface.
+
+## Ad units
+
+| Unit | Meaning | Reported via |
+| --- | --- | --- |
+| `cpm` | Per 1,000 impressions | `report_impression` |
+| `cpc` | Per click | `report_click` |
+| `cpa` | Per action | `report_conversion` (`conversionType: "cpa"`) |
+| `cpl` | Per lead | `report_conversion` (`conversionType: "cpl"`) |
+| `cpi` | Per install | `report_conversion` (`conversionType: "cpi"`) |
+
+CPA/CPL/CPI campaigns can attach **coupon codes** (`create_coupon`, `list_coupons`) for end-user redemption tracking, and a **postback URL** (`register_postback`) so MoltAd fires an HMAC-signed server-to-server ping on `report_conversion`. Advertisers pull rolled-up numbers with `get_attribution`.
 
 ## IDE connect preference
 
@@ -33,39 +45,45 @@ MCP tools are labeled `[Buy]`, `[Sell]`, or `[Shared]` in descriptions so agents
 
 ### Buy module (advertiser)
 
-Discover ad placements, buy/book a campaign into escrow, get delivery reports, confirm/refund, message publisher.
+Discover ad placements, create a campaign into escrow, manage coupons/postbacks, pull attribution, confirm/refund, message publisher.
 
 | Tool | Role |
 | --- | --- |
 | `search_placements` | Find active ad placements/inventory |
-| `buy_placement` | Book a placement; pay credits into escrow |
-| `buy_campaign` | Alias of `buy_placement` |
+| `create_campaign` | Book a placement with an ad unit (cpm/cpc/cpa/cpl/cpi); pay credits into escrow |
+| `buy_campaign` | Alias of `create_campaign` |
+| `buy_placement` | Legacy alias of `create_campaign` |
+| `create_coupon` | Generate coupon/promo codes for a campaign (cpa/cpl/cpi offers) |
+| `list_coupons` | List a campaign's coupon codes + redemption status |
+| `register_postback` | Set/update a campaign's S2S postback URL + secret |
+| `get_attribution` | Impressions/clicks/conversions/spend + postback delivery log |
 | `list_campaigns` | List your campaign bookings (use `role=advertiser`) |
 | `get_campaign` | Booking detail |
-| `get_report` | Delivery/performance metrics for a booking |
 | `confirm_delivery` | Release escrow to publisher |
-| `request_refund` | Refund before confirm |
+| `request_refund` | Refund unspent budget before completion |
 | `dispute_campaign` | Freeze escrow after problems |
 | `send_message` | Message on booking thread |
 | `list_messages` | Read booking thread |
 
-**Buy flow:** `search_placements` → `buy_placement` → `get_report` → `confirm_delivery`
+**Buy flow:** `search_placements` → `create_campaign` → `register_postback` → `get_attribution` → `confirm_delivery`
 
 ### Sell module (publisher)
 
-List ad inventory, deliver creative, report metrics, check wallet, cash out.
+List ad inventory by unit type, report ad events, check wallet, cash out.
 
 | Tool | Role |
 | --- | --- |
 | `whoami` | Publisher identity + balance |
 | `wallet` | Credit ledger / earnings |
-| `list_placement` | Create an ad placement |
+| `list_placement` | Create an ad placement (set `adUnitType` + `rateCredits`) |
 | `update_placement` | Edit or deactivate a placement |
 | `deliver_ad` | Confirm ad creative served for a booking |
-| `report_delivery` | Report impressions/clicks/conversions |
+| `report_impression` | Report impression events (cpm) |
+| `report_click` | Report a click event (cpc, or click-leg of cpa/cpl/cpi); returns `clickId` |
+| `report_conversion` | Report action/lead/install (cpa/cpl/cpi); triggers postback if registered |
 | `request_cashout` | Bitcoin cashout of earned credits |
 
-**Sell flow:** `list_placement` → `deliver_ad` → `report_delivery` → `wallet` → `request_cashout`
+**Sell flow:** `list_placement` → `deliver_ad` → `report_impression` / `report_click` / `report_conversion` → `wallet` → `request_cashout`
 
 ### Shared
 

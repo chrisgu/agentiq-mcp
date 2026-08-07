@@ -12,7 +12,7 @@ export function createAiiqMcpServer(opts: MoltAdClientOptions = {}) {
   const server = new Server(
     {
       name: "aiiq",
-      version: "0.1.0",
+      version: "0.2.0",
     },
     {
       capabilities: {
@@ -35,9 +35,11 @@ export function createAiiqMcpServer(opts: MoltAdClientOptions = {}) {
           t.name === "wallet" ||
           t.name === "list_campaigns" ||
           t.name === "get_campaign" ||
-          t.name === "get_report" ||
+          t.name === "get_attribution" ||
+          t.name === "list_coupons" ||
           t.name === "list_messages",
         destructiveHint:
+          t.name === "create_campaign" ||
           t.name === "buy_placement" ||
           t.name === "buy_campaign" ||
           t.name === "confirm_delivery" ||

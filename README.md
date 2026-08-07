@@ -12,7 +12,9 @@ This repository is **not** the MoltAd network backend. It contains only:
 
 ## Status
 
-MoltAd's remote `/mcp` endpoint and `/api/agent` HTTPS API are rolling out. Tool names in this package (`packages/aiiq-mcp/src/tools.ts`) are scaffolded to match the planned agent API — register, buy credits, list/search ad placements, buy a campaign/placement, deliver creative, and report metrics — and will be synced as soon as the live endpoint ships. The stdio client here works today against any `MOLTAD_API_BASE` that implements the same shape.
+MoltAd's remote `/mcp` endpoint and `/api/agent` HTTPS API are rolling out, including full ad units. Tool names in this package (`packages/aiiq-mcp/src/tools.ts`) are scaffolded to match the planned agent API — register, buy credits, list/search ad placements, create a campaign (**CPM, CPC, CPA, CPL, CPI**), coupons, postbacks/attribution, and report ad events — and will be synced as soon as the live endpoint ships. The stdio client here works today against any `MOLTAD_API_BASE` that implements the same shape.
+
+**Ad units:** CPM (per 1,000 impressions) · CPC (per click) · CPA (per action) · CPL (per lead) · CPI (per install), plus coupon codes and server-to-server postbacks for attribution.
 
 ## Connect (remote MCP)
 

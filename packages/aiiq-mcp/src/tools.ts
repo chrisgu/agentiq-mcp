@@ -6,9 +6,15 @@
  * will be synced once the live endpoint finalizes. Keep in sync with the
  * MoltAd backend `POST /api/agent` tool dispatch when it ships.
  *
+ * Ad units: CPM (per 1,000 impressions), CPC (per click), CPA (per action),
+ * CPL (per lead), CPI (per install). Campaigns can carry a coupon code for
+ * end-user redemption/attribution and a postback URL for server-to-server
+ * conversion tracking.
+ *
  * Modules (Buy / Sell / Shared):
- *  - Buy  = advertisers: discover ad placements, buy campaigns, get reports
- *  - Sell = publishers: list ad inventory, deliver ad creative, cash out
+ *  - Buy  = advertisers: discover placements, create campaigns, coupons,
+ *           postbacks/attribution, reports
+ *  - Sell = publishers: list ad inventory, report ad events, cash out
  *  - Shared = registration, credits, support
  */
 
@@ -47,7 +53,12 @@ const PLACEMENT_KINDS = [
   "general",
 ] as const;
 
+/** CPM = per 1,000 impressions. CPC = per click. CPA = per action. CPL = per lead. CPI = per install. */
+const AD_UNIT_TYPES = ["cpm", "cpc", "cpa", "cpl", "cpi"] as const;
+
 const CREDIT_PACKS = ["starter", "builder", "fleet"] as const;
+
+export type AdUnitType = (typeof AD_UNIT_TYPES)[number];
 
 export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
   // --- Shared ---
@@ -150,9 +161,9 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
             "buy_credits",
             "list_placement",
             "search_placements",
-            "buy_placement",
-            "deliver_ad",
-            "report_delivery",
+            "create_campaign",
+            "register_postback",
+            "report_conversion",
             "request_cashout",
             "ask_help",
             "other",
@@ -167,7 +178,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     },
   },
 
-  // --- Sell module (publisher: list ad inventory, deliver, get paid) ---
+  // --- Sell module (publisher: list ad inventory, report events, get paid) ---
   {
     name: "whoami",
     module: "sell",
@@ -188,7 +199,7 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "list_placement",
     module: "sell",
     description:
-      "[Sell] Create an ad placement (inventory slot) priced in credits per impression/click/booking. Describe audience + surface. Platform fee 10%.",
+      "[Sell] Create an ad placement (inventory slot). Set adUnitType (cpm/cpc/cpa/cpl/cpi) and rateCredits for that unit. Describe audience + surface. Platform fee 10%.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -202,19 +213,21 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
             "Audience + surface + what the advertiser gets (min 40 chars).",
         },
         kind: { type: "string", enum: [...PLACEMENT_KINDS] },
-        priceCredits: {
+        adUnitType: {
+          type: "string",
+          enum: [...AD_UNIT_TYPES],
+          description:
+            "cpm = per 1,000 impressions; cpc = per click; cpa = per action; cpl = per lead; cpi = per install.",
+        },
+        rateCredits: {
           type: "integer",
-          minimum: 10,
+          minimum: 1,
           maximum: 1000000,
           description:
-            "List price in credits (per booking/impression window). 100 credits = $1 USD.",
-        },
-        pricingModel: {
-          type: "string",
-          enum: ["cpm", "cpc", "flat_booking"],
+            "Price in credits per unit (per 1,000 impressions for cpm; per event otherwise). 100 credits = $1 USD.",
         },
       },
-      required: ["title", "description", "priceCredits"],
+      required: ["title", "description", "adUnitType", "rateCredits"],
     },
   },
   {
@@ -228,7 +241,8 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
         placementId: { type: "string" },
         title: { type: "string" },
         description: { type: "string" },
-        priceCredits: { type: "integer", minimum: 10, maximum: 1000000 },
+        adUnitType: { type: "string", enum: [...AD_UNIT_TYPES] },
+        rateCredits: { type: "integer", minimum: 1, maximum: 1000000 },
         active: { type: "boolean" },
       },
       required: ["placementId"],
@@ -238,37 +252,83 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "deliver_ad",
     module: "sell",
     description:
-      "[Sell] Publisher confirms ad creative was served/delivered for a booking. Marks status delivered.",
+      "[Sell] Publisher confirms ad creative was served for a campaign booking. Marks status delivered/live.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
-        bookingId: { type: "string" },
+        campaignId: { type: "string" },
         proof: {
           type: "string",
           description: "Delivery proof: log line, URL, or screenshot ref",
         },
         contentType: { type: "string" },
       },
-      required: ["bookingId"],
+      required: ["campaignId"],
     },
   },
   {
-    name: "report_delivery",
+    name: "report_impression",
     module: "sell",
     description:
-      "[Sell] Report delivery metrics (impressions/clicks/conversions) for a booking. Feeds advertiser reporting.",
+      "[Sell] Report ad impression events for a campaign booking (cpm unit). Batchable; feeds advertiser reporting and billing.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
-        bookingId: { type: "string" },
-        impressions: { type: "integer", minimum: 0 },
-        clicks: { type: "integer", minimum: 0 },
-        conversions: { type: "integer", minimum: 0 },
-        notes: { type: "string" },
+        campaignId: { type: "string" },
+        count: { type: "integer", minimum: 1, maximum: 1000000, description: "Impressions in this batch (default 1)." },
+        occurredAt: { type: "string", description: "ISO 8601 timestamp, defaults to now." },
+        context: { type: "object" },
       },
-      required: ["bookingId"],
+      required: ["campaignId"],
+    },
+  },
+  {
+    name: "report_click",
+    module: "sell",
+    description:
+      "[Sell] Report a click event for a campaign booking (cpc unit, or the click leg of cpa/cpl/cpi). Returns a clickId used to correlate a later conversion/postback.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        clickId: {
+          type: "string",
+          description: "Optional caller-supplied click id for de-duplication/attribution.",
+        },
+        occurredAt: { type: "string" },
+        context: { type: "object" },
+      },
+      required: ["campaignId"],
+    },
+  },
+  {
+    name: "report_conversion",
+    module: "sell",
+    description:
+      "[Sell] Report a conversion event (cpa = action, cpl = lead, cpi = install) for a campaign booking. Correlate with clickId when available; triggers the campaign's postback if registered.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        clickId: { type: "string", description: "clickId from report_click, if known." },
+        conversionType: { type: "string", enum: ["cpa", "cpl", "cpi"] },
+        couponCode: {
+          type: "string",
+          description: "Coupon code redeemed as part of this conversion, if any.",
+        },
+        valueCredits: {
+          type: "integer",
+          minimum: 0,
+          description: "Optional override of the conversion payout; defaults to placement rateCredits.",
+        },
+        occurredAt: { type: "string" },
+        context: { type: "object" },
+      },
+      required: ["campaignId"],
     },
   },
   {
@@ -288,27 +348,79 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     },
   },
 
-  // --- Buy module (advertiser: discover, buy, track campaigns) ---
+  // --- Buy module (advertiser: discover, create campaigns, coupons, attribution) ---
   {
     name: "search_placements",
     module: "buy",
     description:
-      "[Buy] Search active ad placements/inventory across the MoltAd network. Filter by kind/audience before buy_placement.",
+      "[Buy] Search active ad placements/inventory across the MoltAd network. Filter by kind/adUnitType before create_campaign.",
     auth: false,
     inputSchema: {
       type: "object",
       properties: {
         q: { type: "string" },
         kind: { type: "string", enum: [...PLACEMENT_KINDS] },
+        adUnitType: { type: "string", enum: [...AD_UNIT_TYPES] },
         limit: { type: "integer", minimum: 1, maximum: 100 },
       },
     },
   },
   {
-    name: "buy_placement",
+    name: "create_campaign",
     module: "buy",
     description:
-      "[Buy] Buy/book an ad placement: debits advertiser credits into escrow (awaiting_delivery) as a campaign booking. Alias: buy_campaign.",
+      "[Buy] Create an ad campaign booking on a placement: pick adUnitType (cpm/cpc/cpa/cpl/cpi), set budgetCredits, attach creative, and optionally a couponCode and postbackUrl for attribution. Debits advertiser credits into escrow. Aliases: buy_campaign, buy_placement.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        placementId: { type: "string" },
+        adUnitType: { type: "string", enum: [...AD_UNIT_TYPES] },
+        budgetCredits: {
+          type: "integer",
+          minimum: 10,
+          maximum: 1000000,
+          description: "Total campaign budget in credits, escrowed on creation.",
+        },
+        creativeUrl: { type: "string" },
+        creativeText: { type: "string" },
+        durationDays: { type: "integer", minimum: 1, maximum: 365 },
+        couponCode: {
+          type: "string",
+          description: "Optional coupon/promo code end users redeem for this campaign (e.g. cpa/cpl/cpi offers).",
+        },
+        postbackUrl: {
+          type: "string",
+          description: "Optional server-to-server postback URL fired on conversion (see register_postback).",
+        },
+      },
+      required: ["placementId", "adUnitType", "budgetCredits"],
+    },
+  },
+  {
+    name: "buy_campaign",
+    module: "buy",
+    description: "[Buy] Alias of create_campaign.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        placementId: { type: "string" },
+        adUnitType: { type: "string", enum: [...AD_UNIT_TYPES] },
+        budgetCredits: { type: "integer", minimum: 10, maximum: 1000000 },
+        creativeUrl: { type: "string" },
+        creativeText: { type: "string" },
+        durationDays: { type: "integer", minimum: 1, maximum: 365 },
+        couponCode: { type: "string" },
+        postbackUrl: { type: "string" },
+      },
+      required: ["placementId", "adUnitType", "budgetCredits"],
+    },
+  },
+  {
+    name: "buy_placement",
+    module: "buy",
+    description: "[Buy] Legacy alias of create_campaign (pre-ad-unit naming).",
     auth: true,
     inputSchema: {
       type: "object",
@@ -322,19 +434,76 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     },
   },
   {
-    name: "buy_campaign",
+    name: "create_coupon",
     module: "buy",
-    description: "[Buy] Alias of buy_placement (legacy/planned name).",
+    description:
+      "[Buy] Generate one or more coupon/promo codes attached to a campaign for end-user redemption (common on cpa/cpl/cpi offers). Codes are reported back via report_conversion.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
-        placementId: { type: "string" },
-        creativeUrl: { type: "string" },
-        creativeText: { type: "string" },
-        durationDays: { type: "integer", minimum: 1, maximum: 365 },
+        campaignId: { type: "string" },
+        count: { type: "integer", minimum: 1, maximum: 10000, description: "How many codes to generate (default 1)." },
+        prefix: { type: "string", maxLength: 24 },
+        maxRedemptions: { type: "integer", minimum: 1, description: "Per-code redemption limit (default 1)." },
+        expiresAt: { type: "string", description: "ISO 8601 expiry, optional." },
       },
-      required: ["placementId"],
+      required: ["campaignId"],
+    },
+  },
+  {
+    name: "list_coupons",
+    module: "buy",
+    description:
+      "[Buy] List coupon codes for a campaign with redemption status (used for cpa/cpl/cpi attribution audits).",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        status: { type: "string", enum: ["active", "redeemed", "expired", "all"] },
+        limit: { type: "integer", minimum: 1, maximum: 500 },
+      },
+      required: ["campaignId"],
+    },
+  },
+  {
+    name: "register_postback",
+    module: "buy",
+    description:
+      "[Buy] Register or update a server-to-server postback URL + secret for a campaign. MoltAd fires it on report_conversion (cpa/cpl/cpi) with an HMAC signature.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        postbackUrl: { type: "string" },
+        secret: {
+          type: "string",
+          description: "Shared secret used to HMAC-sign postback payloads. Generated if omitted.",
+        },
+        events: {
+          type: "array",
+          items: { type: "string", enum: ["conversion", "click", "impression"] },
+          description: "Which events to receive; defaults to ['conversion'].",
+        },
+      },
+      required: ["campaignId", "postbackUrl"],
+    },
+  },
+  {
+    name: "get_attribution",
+    module: "buy",
+    description:
+      "[Buy] Advertiser retrieves attribution/performance stats for a campaign: impressions, clicks, conversions by type (cpa/cpl/cpi), coupon redemptions, spend, and postback delivery log.",
+    auth: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignId: { type: "string" },
+        groupBy: { type: "string", enum: ["day", "placement", "conversionType"] },
+      },
+      required: ["campaignId"],
     },
   },
   {
@@ -355,66 +524,54 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     name: "get_campaign",
     module: "buy",
     description:
-      "[Buy] Get one campaign booking you are party to, including delivery/report data if submitted.",
+      "[Buy] Get one campaign booking you are party to, including delivery/attribution summary if available.",
     auth: true,
     inputSchema: {
       type: "object",
-      properties: { bookingId: { type: "string" } },
-      required: ["bookingId"],
-    },
-  },
-  {
-    name: "get_report",
-    module: "buy",
-    description:
-      "[Buy] Advertiser retrieves delivery/performance report (impressions/clicks/conversions) for a campaign booking.",
-    auth: true,
-    inputSchema: {
-      type: "object",
-      properties: { bookingId: { type: "string" } },
-      required: ["bookingId"],
+      properties: { campaignId: { type: "string" } },
+      required: ["campaignId"],
     },
   },
   {
     name: "confirm_delivery",
     module: "buy",
     description:
-      "[Buy] Advertiser releases escrow after confirming ad delivery: publisher receives payout (90%), platform fee (10%).",
+      "[Buy] Advertiser releases escrow after confirming ad delivery/attribution: publisher receives payout (90%), platform fee (10%).",
     auth: true,
     inputSchema: {
       type: "object",
-      properties: { bookingId: { type: "string" } },
-      required: ["bookingId"],
+      properties: { campaignId: { type: "string" } },
+      required: ["campaignId"],
     },
   },
   {
     name: "request_refund",
     module: "buy",
     description:
-      "[Buy] Advertiser refund before confirm: returns escrowed credits, cancels booking.",
+      "[Buy] Advertiser refund of unspent budget before campaign completion: returns escrowed credits, cancels/closes booking.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
-        bookingId: { type: "string" },
+        campaignId: { type: "string" },
         reason: { type: "string", maxLength: 500 },
       },
-      required: ["bookingId"],
+      required: ["campaignId"],
     },
   },
   {
     name: "dispute_campaign",
     module: "buy",
     description:
-      "[Buy] Advertiser opens a dispute. Freezes escrow (no auto-release) and blocks publisher cashout.",
+      "[Buy] Advertiser opens a dispute (e.g. suspected invalid clicks/conversions). Freezes escrow and blocks publisher cashout.",
     auth: true,
     inputSchema: {
       type: "object",
       properties: {
-        bookingId: { type: "string" },
+        campaignId: { type: "string" },
         reason: { type: "string", minLength: 8, maxLength: 500 },
       },
-      required: ["bookingId", "reason"],
+      required: ["campaignId", "reason"],
     },
   },
   {
@@ -426,10 +583,10 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        bookingId: { type: "string" },
+        campaignId: { type: "string" },
         body: { type: "string", minLength: 1, maxLength: 4000 },
       },
-      required: ["bookingId", "body"],
+      required: ["campaignId", "body"],
     },
   },
   {
@@ -441,10 +598,10 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        bookingId: { type: "string" },
+        campaignId: { type: "string" },
         limit: { type: "integer", minimum: 1, maximum: 200 },
       },
-      required: ["bookingId"],
+      required: ["campaignId"],
     },
   },
 ];
@@ -453,12 +610,12 @@ export const AIIQ_MCP_TOOL_NAMES = AIIQ_MCP_TOOLS.map((t) => t.name);
 
 export const AIIQ_MCP_TOOL_COUNT = AIIQ_MCP_TOOLS.length;
 
-/** Buy module (advertiser): discover placements, book campaigns, track reports. */
+/** Buy module (advertiser): discover placements, create campaigns, coupons, postbacks/attribution. */
 export const MCP_BUY_TOOLS = AIIQ_MCP_TOOLS.filter((t) => t.module === "buy").map(
   (t) => t.name,
 );
 
-/** Sell module (publisher): list inventory, deliver ads, cash out. */
+/** Sell module (publisher): list inventory, report ad events, cash out. */
 export const MCP_SELL_TOOLS = AIIQ_MCP_TOOLS.filter((t) => t.module === "sell").map(
   (t) => t.name,
 );
@@ -472,22 +629,30 @@ export const MCP_MODULES = {
   buy: {
     name: "Buy",
     summary:
-      "Advertiser: search ad placements, buy/book a campaign, get delivery reports, confirm/refund, message publisher.",
+      "Advertiser: search ad placements, create a campaign (cpm/cpc/cpa/cpl/cpi), attach coupons + postbacks, track attribution, confirm/refund.",
     tools: MCP_BUY_TOOLS,
     flow: [
       "search_placements",
-      "buy_placement",
-      "get_campaign",
-      "get_report",
+      "create_campaign",
+      "register_postback",
+      "get_attribution",
       "confirm_delivery",
     ],
   },
   sell: {
     name: "Sell",
     summary:
-      "Publisher: list ad inventory, deliver creative, report metrics, check wallet, cash out earnings.",
+      "Publisher: list ad inventory by unit type, report impressions/clicks/conversions, check wallet, cash out earnings.",
     tools: MCP_SELL_TOOLS,
-    flow: ["list_placement", "deliver_ad", "report_delivery", "wallet", "request_cashout"],
+    flow: [
+      "list_placement",
+      "deliver_ad",
+      "report_impression",
+      "report_click",
+      "report_conversion",
+      "wallet",
+      "request_cashout",
+    ],
   },
   shared: {
     name: "Shared",

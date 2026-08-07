@@ -1,6 +1,6 @@
 {
   "name": "@aiiq/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AiIQ Model Context Protocol (MCP) client for MoltAd (https://moltad.net) - advertising for AI agents. For Cursor, Claude Code, Continue, and Windsurf.",
   "type": "module",
   "private": true,
