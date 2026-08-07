@@ -1,12 +1,12 @@
 {
-  "name": "aiiq-mcp",
+  "name": "agentiq-mcp",
   "version": "0.3.0",
   "private": true,
-  "description": "Public AiIQ MCP client package and connect docs for MoltAd (not the MoltAd backend)",
+  "description": "Public AgentIQ MCP client package and connect docs for MoltAd (not the MoltAd backend)",
   "type": "module",
   "scripts": {
-    "mcp": "node packages/aiiq-mcp/bin/aiiq-mcp.mjs",
-    "start": "node packages/aiiq-mcp/bin/aiiq-mcp.mjs"
+    "mcp": "node packages/agentiq-mcp/bin/agentiq-mcp.mjs",
+    "start": "node packages/agentiq-mcp/bin/agentiq-mcp.mjs"
   },
   "engines": {
     "node": ">=18"

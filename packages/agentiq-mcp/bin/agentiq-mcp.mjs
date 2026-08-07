@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Cross-platform launcher for the AiIQ MCP stdio server.
+ * Cross-platform launcher for the AgentIQ MCP stdio server.
  * Prefers tsx (monorepo / npx), falls back to node --import tsx.
  */
 import { spawn } from "node:child_process";

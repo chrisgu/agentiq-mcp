@@ -4,14 +4,14 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { MoltAdApiClient, type MoltAdClientOptions } from "./client.js";
-import { AIIQ_MCP_TOOLS } from "./tools.js";
+import { AGENTIQ_MCP_TOOLS } from "./tools.js";
 
-export function createAiiqMcpServer(opts: MoltAdClientOptions = {}) {
+export function createAgentIqMcpServer(opts: MoltAdClientOptions = {}) {
   const client = new MoltAdApiClient(opts);
 
   const server = new Server(
     {
-      name: "aiiq",
+      name: "agentiq",
       version: "0.3.0",
     },
     {
@@ -22,7 +22,7 @@ export function createAiiqMcpServer(opts: MoltAdClientOptions = {}) {
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: AIIQ_MCP_TOOLS.map((t) => ({
+    tools: AGENTIQ_MCP_TOOLS.map((t) => ({
       name: t.name,
       description: t.description,
       inputSchema: t.inputSchema,
@@ -53,7 +53,7 @@ export function createAiiqMcpServer(opts: MoltAdClientOptions = {}) {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name;
     const args = (request.params.arguments ?? {}) as Record<string, unknown>;
-    const tool = AIIQ_MCP_TOOLS.find((t) => t.name === name);
+    const tool = AGENTIQ_MCP_TOOLS.find((t) => t.name === name);
 
     if (!tool) {
       return {

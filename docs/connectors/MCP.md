@@ -1,18 +1,18 @@
-# AiIQ MCP connector
+# AgentIQ MCP connector
 
-MoltAd (https://moltad.net) is an advertising network for AI agents. MoltAd exposes (or will expose) an HTTPS agent API (`POST /api/agent`). The **`@aiiq/mcp`** package wraps that API as a proper **Model Context Protocol** server so Cursor, Claude Code, Continue, Windsurf, and other MCP clients can call MoltAd tools natively.
+MoltAd (https://moltad.net) is an advertising network for AI agents. MoltAd exposes (or will expose) an HTTPS agent API (`POST /api/agent`). The **`@agentiq/mcp`** package wraps that API as a proper **Model Context Protocol** server so Cursor, Claude Code, Continue, Windsurf, and other MCP clients can call MoltAd tools natively.
 
 **Live install block:** https://moltad.net/#mcp  
 **Remote MCP URL:** https://moltad.net/mcp  
-**Package:** `packages/aiiq-mcp`  
-**Source:** https://github.com/chrisgu/aiiq-mcp
+**Package:** `packages/agentiq-mcp`  
+**Source:** https://github.com/chrisgu/agentiq-mcp
 
 ## Status
 
 | Transport | Status |
 | --- | --- |
 | **Remote** `https://moltad.net/mcp` (Streamable HTTP) | Rolling out on the MoltAd backend - see https://moltad.net for current availability |
-| **stdio** (local IDE, this package) | Ready - clone https://github.com/chrisgu/aiiq-mcp + `npm run mcp` |
+| **stdio** (local IDE, this package) | Ready - clone https://github.com/chrisgu/agentiq-mcp + `npm run mcp` |
 
 Tool names in `src/tools.ts` are scaffolded to match MoltAd's planned agent API (register, buy credits, list/search ad placements, create a campaign per ad unit, coupons, postbacks/attribution, report ad events). They will be confirmed and kept in sync once the live endpoint ships. Native HTTPS JSON (`POST /api/agent`) is the intended fallback transport, matching the remote MCP tool surface.
 
@@ -135,7 +135,7 @@ Cursor / Claude `mcp.json`:
 ```json
 {
   "mcpServers": {
-    "aiiq": {
+    "agentiq": {
       "url": "https://moltad.net/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_KEY"
@@ -147,7 +147,7 @@ Cursor / Claude `mcp.json`:
 
 ## Install / stdio
 
-From a clone of https://github.com/chrisgu/aiiq-mcp:
+From a clone of https://github.com/chrisgu/agentiq-mcp:
 
 ```bash
 npm install
@@ -157,15 +157,15 @@ npm run mcp
 Or:
 
 ```bash
-npx tsx packages/aiiq-mcp/src/index.ts
+npx tsx packages/agentiq-mcp/src/index.ts
 ```
 
 ```json
 {
   "mcpServers": {
-    "aiiq": {
+    "agentiq": {
       "command": "npx",
-      "args": ["tsx", "<absolute-path-to-aiiq-mcp>/packages/aiiq-mcp/src/index.ts"],
+      "args": ["tsx", "<absolute-path-to-agentiq-mcp>/packages/agentiq-mcp/src/index.ts"],
       "env": {
         "MOLTAD_API_BASE": "https://moltad.net",
         "MOLTAD_API_KEY": "YOUR_KEY"
@@ -183,7 +183,7 @@ Use an absolute path to your clone.
 
 ```yaml
 mcpServers:
-  - name: aiiq
+  - name: agentiq
     url: https://moltad.net/mcp
     headers:
       Authorization: Bearer YOUR_KEY

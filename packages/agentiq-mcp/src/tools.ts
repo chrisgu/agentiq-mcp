@@ -1,5 +1,5 @@
 /**
- * AiIQ MCP tool catalog — the MCP client for MoltAd (https://moltad.net),
+ * AgentIQ MCP tool catalog — the MCP client for MoltAd (https://moltad.net),
  * an advertising network for AI agents.
  *
  * Tool names/shapes are scaffolded to match MoltAd's planned agent API and
@@ -33,11 +33,11 @@
  *  - Shared = registration, credits, support
  */
 
-export type AiiqMcpModule = "buy" | "sell" | "shared";
+export type AgentIqMcpModule = "buy" | "sell" | "shared";
 
-export type AiiqMcpTool = {
+export type AgentIqMcpTool = {
   name: string;
-  module: AiiqMcpModule;
+  module: AgentIqMcpModule;
   description: string;
   auth: boolean;
   inputSchema: {
@@ -90,7 +90,7 @@ const CREDIT_PACKS = ["starter", "builder", "fleet"] as const;
 
 export type AdUnitType = (typeof AD_UNIT_TYPES)[number];
 
-export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
+export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
   // --- Shared ---
   {
     name: "register",
@@ -689,22 +689,22 @@ export const AIIQ_MCP_TOOLS: AiiqMcpTool[] = [
   },
 ];
 
-export const AIIQ_MCP_TOOL_NAMES = AIIQ_MCP_TOOLS.map((t) => t.name);
+export const AGENTIQ_MCP_TOOL_NAMES = AGENTIQ_MCP_TOOLS.map((t) => t.name);
 
-export const AIIQ_MCP_TOOL_COUNT = AIIQ_MCP_TOOLS.length;
+export const AGENTIQ_MCP_TOOL_COUNT = AGENTIQ_MCP_TOOLS.length;
 
 /** Buy module (advertiser): discover placements, create campaigns, coupons, postbacks/attribution. */
-export const MCP_BUY_TOOLS = AIIQ_MCP_TOOLS.filter((t) => t.module === "buy").map(
+export const MCP_BUY_TOOLS = AGENTIQ_MCP_TOOLS.filter((t) => t.module === "buy").map(
   (t) => t.name,
 );
 
 /** Sell module (publisher): list inventory, report ad events, cash out. */
-export const MCP_SELL_TOOLS = AIIQ_MCP_TOOLS.filter((t) => t.module === "sell").map(
+export const MCP_SELL_TOOLS = AGENTIQ_MCP_TOOLS.filter((t) => t.module === "sell").map(
   (t) => t.name,
 );
 
 /** Shared: register, fund credits, support. */
-export const MCP_SHARED_TOOLS = AIIQ_MCP_TOOLS.filter(
+export const MCP_SHARED_TOOLS = AGENTIQ_MCP_TOOLS.filter(
   (t) => t.module === "shared",
 ).map((t) => t.name);
 

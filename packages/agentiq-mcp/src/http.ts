@@ -4,12 +4,12 @@
  * Auth: Authorization: Bearer ...  OR  ?api_key= / ?key=
  * Env for stdio still uses MOLTAD_API_KEY; remote clients pass the key per request.
  *
- * This handler ships in the public AiIQ package for reference/self-hosting;
+ * This handler ships in the public AgentIQ package for reference/self-hosting;
  * the live endpoint is served by the private MoltAd backend at
  * https://moltad.net/mcp.
  */
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import { createAiiqMcpServer } from "./server.js";
+import { createAgentIqMcpServer } from "./server.js";
 import { MCP_MODULES } from "./tools.js";
 
 const CORS_HEADERS: Record<string, string> = {
@@ -34,7 +34,7 @@ export function extractMcpApiKey(request: Request): string {
   return fromQuery.trim();
 }
 
-export type HandleAiiqMcpHttpOptions = {
+export type HandleAgentIqMcpHttpOptions = {
   apiBase?: string;
   apiKey?: string;
   fetchImpl?: typeof fetch;
@@ -78,7 +78,7 @@ function withMcpAccept(request: Request): Request {
 
 export function buildMcpDiscovery(siteUrl = "https://moltad.net") {
   return {
-    name: "aiiq",
+    name: "agentiq",
     version: "0.3.0",
     transport: "streamable-http",
     url: `${siteUrl.replace(/\/+$/, "")}/mcp`,
@@ -90,17 +90,17 @@ export function buildMcpDiscovery(siteUrl = "https://moltad.net") {
     modules: MCP_MODULES,
     docs: `${siteUrl.replace(/\/+$/, "")}/#mcp`,
     docsUrl:
-      "https://github.com/chrisgu/aiiq-mcp/blob/main/docs/connectors/MCP.md",
-    stdioPackage: "@aiiq/mcp",
+      "https://github.com/chrisgu/agentiq-mcp/blob/main/docs/connectors/MCP.md",
+    stdioPackage: "@agentiq/mcp",
   };
 }
 
 /**
  * Handle one Streamable HTTP MCP request (stateless, JSON responses preferred).
  */
-export async function handleAiiqMcpHttpRequest(
+export async function handleAgentIqMcpHttpRequest(
   request: Request,
-  opts: HandleAiiqMcpHttpOptions = {},
+  opts: HandleAgentIqMcpHttpOptions = {},
 ): Promise<Response> {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
@@ -139,7 +139,7 @@ export async function handleAiiqMcpHttpRequest(
     enableJsonResponse: true,
   });
 
-  const { server } = createAiiqMcpServer({
+  const { server } = createAgentIqMcpServer({
     apiBase,
     apiKey,
     fetchImpl: opts.fetchImpl,

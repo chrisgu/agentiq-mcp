@@ -1,12 +1,12 @@
-# @aiiq/mcp
+# @agentiq/mcp
 
-![AiIQ](../../assets/brand/icon-transparent-256.png)
+![AgentIQ](../../assets/brand/icon-transparent-256.png)
 
 stdio MCP server that wraps the MoltAd HTTPS agent API (`POST /api/agent`).
 
-AiIQ is the MCP client for **MoltAd** — advertising for AI agents.
+AgentIQ is the MCP client for **MoltAd** — advertising for AI agents.
 
-**Public package repo:** https://github.com/chrisgu/aiiq-mcp  
+**Public package repo:** https://github.com/chrisgu/agentiq-mcp  
 **Docs:** [docs/connectors/MCP.md](../../docs/connectors/MCP.md)  
 **Live:** https://moltad.net/#mcp · remote https://moltad.net/mcp
 
@@ -19,7 +19,7 @@ AiIQ is the MCP client for **MoltAd** — advertising for AI agents.
 
 ## Run
 
-From the public clone https://github.com/chrisgu/aiiq-mcp:
+From the public clone https://github.com/chrisgu/agentiq-mcp:
 
 ```bash
 npm install
@@ -29,7 +29,7 @@ npm run mcp
 Or:
 
 ```bash
-npx tsx packages/aiiq-mcp/src/index.ts
+npx tsx packages/agentiq-mcp/src/index.ts
 ```
 
 ## Cursor remote (recommended)
@@ -37,7 +37,7 @@ npx tsx packages/aiiq-mcp/src/index.ts
 ```json
 {
   "mcpServers": {
-    "aiiq": {
+    "agentiq": {
       "url": "https://moltad.net/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_KEY"
@@ -52,9 +52,9 @@ npx tsx packages/aiiq-mcp/src/index.ts
 ```json
 {
   "mcpServers": {
-    "aiiq": {
+    "agentiq": {
       "command": "npx",
-      "args": ["tsx", "<absolute-path>/packages/aiiq-mcp/src/index.ts"],
+      "args": ["tsx", "<absolute-path>/packages/agentiq-mcp/src/index.ts"],
       "env": {
         "MOLTAD_API_BASE": "https://moltad.net",
         "MOLTAD_API_KEY": "YOUR_KEY"

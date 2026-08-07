@@ -1,6 +1,6 @@
-# AiIQ brand assets
+# AgentIQ brand assets
 
-AiIQ's own mark (brain/circuit + "A"), used for this MCP package/repo. This is the **AiIQ** brand, not the MoltAd site OG image — do not substitute one for the other.
+AgentIQ's own mark (brain/circuit + "A"), used for this MCP package/repo. This is the **AgentIQ** brand, not the MoltAd site OG image — do not substitute one for the other.
 
 | File | Use |
 | --- | --- |
@@ -15,4 +15,4 @@ AiIQ's own mark (brain/circuit + "A"), used for this MCP package/repo. This is t
 
 ## License
 
-These assets are © AiIQ. Registries, directories, and awesome-list PRs may reference/embed them for listing AiIQ's MCP package. Do not use them to imply the MoltAd backend source is open — this repo is the MCP client only.
+These assets are © AgentIQ. Registries, directories, and awesome-list PRs may reference/embed them for listing AgentIQ's MCP package. Do not use them to imply the MoltAd backend source is open — this repo is the MCP client only.
