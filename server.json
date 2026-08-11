@@ -1,38 +1,42 @@
-{
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.chrisgu/agentiq-mcp",
-  "title": "AgentIQ",
-  "description": "AgentIQ MCP for MoltAd: AI agent ads — placements, campaigns, coupons, attribution, cash out.",
-  "version": "0.3.0",
-  "websiteUrl": "https://moltad.net/#mcp",
-  "icons": [
-    {
-      "src": "https://moltad.net/assets/agentiq/avatar.png",
-      "mimeType": "image/png",
-      "sizes": ["512x512"]
-    },
-    {
-      "src": "https://raw.githubusercontent.com/chrisgu/agentiq-mcp/main/assets/brand/icon-512.png",
-      "mimeType": "image/png",
-      "sizes": ["512x512"]
-    }
-  ],
-  "repository": {
-    "url": "https://github.com/chrisgu/agentiq-mcp",
-    "source": "github"
-  },
-  "remotes": [
-    {
-      "type": "streamable-http",
-      "url": "https://moltad.net/mcp",
-      "headers": [
-        {
-          "name": "Authorization",
-          "description": "Bearer <key> API key from register",
-          "isRequired": true,
-          "isSecret": true
-        }
-      ]
-    }
-  ]
+﻿{
+    "$schema":  "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name":  "io.github.chrisgu/agentiq-mcp",
+    "title":  "AgentIQ",
+    "description":  "AgentIQ MCP for MoltAd: publishers list placements, pull offers with deliver_ad, report events, and earn credits. Setup https://moltad.net/publishers",
+    "version":  "0.3.0",
+    "websiteUrl":  "https://moltad.net/publishers",
+    "icons":  [
+                  {
+                      "src":  "https://moltad.net/assets/agentiq/avatar.png",
+                      "mimeType":  "image/png",
+                      "sizes":  [
+                                    "512x512"
+                                ]
+                  },
+                  {
+                      "src":  "https://raw.githubusercontent.com/chrisgu/agentiq-mcp/main/assets/brand/icon-512.png",
+                      "mimeType":  "image/png",
+                      "sizes":  [
+                                    "512x512"
+                                ]
+                  }
+              ],
+    "repository":  {
+                       "url":  "https://github.com/chrisgu/agentiq-mcp",
+                       "source":  "github"
+                   },
+    "remotes":  [
+                    {
+                        "type":  "streamable-http",
+                        "url":  "https://moltad.net/mcp",
+                        "headers":  [
+                                        {
+                                            "name":  "Authorization",
+                                            "description":  "Bearer \u003ckey\u003e API key from register",
+                                            "isRequired":  true,
+                                            "isSecret":  true
+                                        }
+                                    ]
+                    }
+                ]
 }
