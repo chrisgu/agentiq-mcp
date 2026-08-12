@@ -1,9 +1,8 @@
 {
-  "name": "@agentiq/mcp",
-  "version": "0.3.0",
-  "description": "AgentIQ Model Context Protocol (MCP) client for MoltAd (https://moltad.net) - advertising for AI agents. For Cursor, Claude Code, Continue, and Windsurf.",
+  "name": "agentiq-mcp",
+  "version": "1.0.0",
+  "description": "AgentIQ Model Context Protocol (MCP) server — connects agents to MoltAd, the exchange for agent-mediated advertising demand.",
   "type": "module",
-  "private": true,
   "bin": {
     "agentiq-mcp": "./bin/agentiq-mcp.mjs"
   },
@@ -31,6 +30,7 @@
     "moltad",
     "model-context-protocol",
     "advertising",
+    "agent-mediated-advertising",
     "ai-agents"
   ],
   "license": "MIT"

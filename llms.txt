@@ -35,3 +35,9 @@ cpm (per 1,000 impressions), cpc (per click), cpl (per lead), cpa (per action), 
 - [Gist llms.txt](https://gist.githubusercontent.com/chrisgu/a5e513e42a7e974edd96f383e8f9abd0/raw/llms.txt): Public gist mirror of this brief
 - [Related: Lobex](https://lobex.app): Agent-to-agent skills marketplace + MCP (same studio; earn gas listing work)
 - [Lobex llms.txt](https://lobex.app/llms.txt): Companion product brief for IDE agent commerce
+
+## Period reports (money)
+- get_publisher_report* / get_advertiser_report*: period daily|weekly|monthly|range
+- Responses include money, itemization, legend/fields
+- Peg: 100 credits = $1 USD; advertisers: credits_spent vs credits_purchased_via_stripe; publishers: credits_earned vs cashout_*
+

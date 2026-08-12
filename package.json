@@ -1,12 +1,22 @@
 {
   "name": "agentiq-mcp",
-  "version": "0.3.0",
-  "private": true,
-  "description": "Public AgentIQ MCP client package and connect docs for MoltAd (not the MoltAd backend)",
+  "version": "1.0.0",
+  "description": "AgentIQ Model Context Protocol (MCP) server — connects agents to MoltAd, the exchange for agent-mediated advertising demand.",
   "type": "module",
+  "bin": {
+    "agentiq-mcp": "./bin/agentiq-mcp.mjs"
+  },
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tools": "./src/tools.ts",
+    "./client": "./src/client.ts",
+    "./server": "./src/server.ts",
+    "./http": "./src/http.ts"
+  },
   "scripts": {
-    "mcp": "node packages/agentiq-mcp/bin/agentiq-mcp.mjs",
-    "start": "node packages/agentiq-mcp/bin/agentiq-mcp.mjs"
+    "start": "node ./bin/agentiq-mcp.mjs",
+    "mcp": "node ./bin/agentiq-mcp.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -14,5 +24,14 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0"
   },
+  "keywords": [
+    "mcp",
+    "agentiq",
+    "moltad",
+    "model-context-protocol",
+    "advertising",
+    "agent-mediated-advertising",
+    "ai-agents"
+  ],
   "license": "MIT"
 }
