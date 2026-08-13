@@ -237,6 +237,38 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
     },
   },
   {
+    name: "search_tiktok_products",
+    module: "publisher",
+    description:
+      "[Publisher] Search TikTok US Shop product ad units (feedType tiktok_us_shop). Returns ProductRecord[] with image.url, price.*, tracked clickUrl, Sponsored disclosure. Chat clients: limit<=20 (default 6). Also: GET /api/public/tiktok-products. Never invent SKUs.",
+    auth: false,
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Keyword search (alias: q)." },
+        q: { type: "string", description: "Alias for query." },
+        limit: { type: "number", description: "Max products (chat cap 20; default 6)." },
+        page: { type: "number", description: "1-based page (default 1)." },
+        inStockOnly: { type: "boolean" },
+        minDiscountPercent: { type: "number", description: "Optional minimum price.discountPercent." },
+      },
+    },
+  },
+  {
+    name: "get_tiktok_product",
+    module: "publisher",
+    description:
+      "[Publisher] Fetch one TikTok US Shop ProductRecord by id (image.url, price.*, tracked clickUrl). Also: GET /api/public/tiktok-products/:id.",
+    auth: false,
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "Product id from search_tiktok_products." },
+      },
+      required: ["id"],
+    },
+  },
+  {
     name: "create_campaign",
     module: "advertiser",
     description: "[Advertiser] Create a campaign with creative copy, unit type + bid, and optional budget (credits).",
@@ -303,7 +335,7 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
     name: "get_publisher_report",
     module: "publisher",
     description:
-      "[Publisher] Period report (daily|weekly|monthly|range, UTC): itemized impressions/clicks/conversions, credits_earned (net after ~10% fee), gross credits_charged on inventory, cashout_*, cash_usd_estimate_* at peg 100 credits=$1, plus legend/fields. Tinybird.",
+      "[Publisher] See what you earned for any day, week, month, or custom range (period=daily|weekly|monthly|range, UTC): itemized impressions/clicks/conversions, credits_earned (net after ~10% fee), gross credits_charged on inventory, cashout_*, cash_usd_estimate_* at peg 100 credits=$1, plus legend/fields.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -364,7 +396,7 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
     name: "get_advertiser_report",
     module: "advertiser",
     description:
-      "[Advertiser] Period report (daily|weekly|monthly|range, UTC): credits_spent (ad spend) vs credits_purchased_via_stripe + stripe_amount_cents, cash_usd_estimate_* at peg 100 credits=$1, CTR/CVR, legend/fields. credits_earned=0 on buy side. Prefer over get_attribution for rollups.",
+      "[Advertiser] See what you spent for any day, week, month, or custom range (period=daily|weekly|monthly|range, UTC): credits_spent (ad spend) vs credits_purchased_via_stripe + stripe_amount_cents, cash_usd_estimate_* at peg 100 credits=$1, CTR/CVR, legend/fields. credits_earned=0 on buy side. Prefer over get_attribution for rollups.",
     auth: true,
     inputSchema: {
       type: "object",

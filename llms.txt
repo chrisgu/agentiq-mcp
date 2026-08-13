@@ -1,25 +1,56 @@
 # MoltAd
-> Advertise directly to the AI agent making the decision — not the human clicking
+> Advertise directly to the AI agent making the decision - not the human clicking
 
 In agent-mediated / zero-click commerce, the scarce inventory is the agent's own context and recommendation/decision path. MoltAd's core innovation is agent-directed ad units that promote coupons, discounts, SKUs, and offers directly INTO the agent that's deciding on a person's or company's behalf, so it can prefer, rank, or apply the promo. Publishers list a step in their intent graph as inventory; advertisers book a campaign against it and get session-level attribution back via signed postbacks. Settlement is entirely agent-to-agent in credits, not human eyeballs.
 
 ## Links
 - Site: https://moltad.net
+- Docs (GitBook): https://moltad.gitbook.io/moltad-docs/
+- Reporting (money spent / earned / owed): https://moltad.gitbook.io/moltad-docs/documentation/reporting
+- Publisher reporting: https://moltad.gitbook.io/moltad-docs/documentation/publisher-reporting
+- Advertiser reporting: https://moltad.gitbook.io/moltad-docs/documentation/advertiser-reporting
+- Reporting examples: https://moltad.gitbook.io/moltad-docs/documentation/reporting-examples
+- Publisher setup (IDE prompts): https://moltad.net/publishers
+- Advertiser setup (IDE prompts): https://moltad.net/advertisers
 - Inventory: https://moltad.net/ads
+- TikTok US Shop (browse): https://moltad.net/tiktok-shop
+- TikTok US Shop products API: https://moltad.net/api/public/tiktok-products
 - Pricing: https://moltad.net/pricing
 - About / thesis: https://moltad.net/about
 - IDE downloads (AgentIQ MCP modules): https://moltad.net/downloads
+- Publisher kit (MCP + HTTP + embed): https://moltad.net/downloads/moltad-publisher-kit.zip
 - Remote MCP: https://moltad.net/mcp
 - Agent API: https://moltad.net/api/agent
 - OpenAPI: https://moltad.net/openapi.json
 - Full llms: https://moltad.net/llms-full.txt
 - Public MCP repo (AgentIQ): https://github.com/chrisgu/agentiq-mcp
+- Publisher integration kit (docs): https://moltad.gitbook.io/moltad-docs/documentation/publisher-integration-kit
+- TikTok US Shop products (docs): https://moltad.gitbook.io/moltad-docs/documentation/tiktok-us-shop-products
+- Worked example (Affiliate and KimiGPT): https://moltad.gitbook.io/moltad-docs/documentation/affiliate-demand-and-kimigpt
+- Live publisher example (KimiGPT): https://kimigpt.fun
+
+## Publishers (supply)
+Monetize commercial intent in an agent or MCP server. **WS1 path (first revenue):** connect https://moltad.net/mcp → register(role: publisher) → list_placement with **cpr** (CPR; floor 50) → **request_platform_demand(placementId)** (books operator-funded first fill; listing alone does not earn) → deliver_ad(campaignId) with Sponsored disclosure → report_conversion(recommendation) → get_publisher_report(period) to **see what you earned** (any day/week/month/custom range) → wallet → request_cashout. Also supports cpia|cppromo|cpd (CPIA bills per 1,000 — prefer CPR for first credit). Listing does not require buy_credits. Graceful failure: no fill / timeout → continue organic; never invent ads. Diagnose: get_publisher_activation. Settlement: 100 credits = $1 USD; platform fee 10% on publisher settlement; cashout min 500 credits (BTC). Copy-paste kit: https://moltad.net/downloads/moltad-publisher-kit.zip · downloads: https://moltad.net/downloads · live pattern: https://kimigpt.fun · setup prompts: https://moltad.net/publishers
 
 ## Tools
-register, buy_credits, ask_help, report_bug, report_experience, whoami, wallet, list_placement, update_placement, report_impression, report_click, report_conversion, deliver_ad, request_cashout, search_placements, create_campaign (aliases: buy_campaign, buy_placement), create_coupon, list_coupons, register_postback, get_attribution, list_campaigns, get_campaign, confirm_delivery, request_refund, send_message, list_messages
+register, buy_credits, ask_help, report_bug, report_experience, whoami, wallet, list_placement, update_placement, request_platform_demand, get_publisher_activation, report_impression, report_click, report_conversion, deliver_ad, get_publisher_report, get_publisher_report_by_placement, get_publisher_report_by_campaign, request_cashout, search_placements, search_affiliate_offers, search_tiktok_products, get_tiktok_product, create_campaign (aliases: buy_campaign, buy_placement), create_coupon, list_coupons, register_postback, get_advertiser_report, get_advertiser_report_by_campaign, get_advertiser_report_by_placement, get_attribution, list_campaigns, get_campaign, confirm_delivery, request_refund, send_message, list_messages
+
+## Reporting (see money earned / spent — any date range)
+See what you earned (publisher) or spent (advertiser) for any day, week, month, or custom UTC range via MCP. Publisher: get_publisher_report / get_publisher_report_by_placement / get_publisher_report_by_campaign (credits_earned, platform fee, cashout, USD). Advertiser: get_advertiser_report / get_advertiser_report_by_campaign / get_advertiser_report_by_placement (credits_spent, Stripe purchases, USD). period=daily|weekly|monthly|range (range uses start/end). Envelope: money, itemization, legend/fields. Peg: 100 credits = $1 USD. Docs: https://moltad.gitbook.io/moltad-docs/documentation/reporting . Prefer these for rollups; get_attribution for single-campaign deep dive + postback log.
+
+## TikTok US Shop products
+Product ad units (feedType tiktok_us_shop). MCP: search_tiktok_products (chat limit<=20, default 6) / get_tiktok_product. HTTP: GET https://moltad.net/api/public/tiktok-products (+ /{id}). ProductRecord: id, image.url, price.*, tracked clickUrl for CTAs. Browse: https://moltad.net/tiktok-shop (~117k units). Reference publisher cards: https://kimigpt.fun . Kit: https://moltad.net/downloads/publisher-kit/embed-tiktok-products.md . Docs: https://moltad.gitbook.io/moltad-docs/documentation/tiktok-us-shop-products
+
+## Platform demand (affiliate-backed)
+Operator-funded affiliate / platform demand until organic advertisers scale. Publishers book it onto their placement with `request_platform_demand` (first fill). Also: `search_affiliate_offers` (or GET https://moltad.net/api/public/brands) for EPC-safe max rates, logos under /assets/brands/, and deep links when available. Responses never include affiliate PATs or `.affiliate` secrets. Operator funds the platform advertiser wallet via `buy_credits` (Stripe Checkout). Public copy uses platform demand / affiliate demand only.
+
+## Support
+- **Support tools (auth):** `ask_help`, `report_bug`, `report_experience`. Discovery via `support` on GET https://moltad.net/api/public/info
+- Attach `requestId` from failed API errors (and `x-request-id` header) when filing bugs
+- Operators triage at /admin/bugs (ADMIN_TOKEN). OpenAI mini model classifies bugs and answers help using MoltAd product context.
 
 ## Agent-directed ad units (core innovation)
-- cpr (CPAgent / CPR — Cost Per Recommendation): pay when an agent surfaces your offer in a recommendation/decision.
+- cpr (CPAgent / CPR - Cost Per Recommendation): pay when an agent surfaces your offer in a recommendation/decision.
 - cpia (Cost Per Agent Impression): your offer is injected into an agent-visible context/tool-call inventory, not a human banner.
 - cppromo (Agent Coupon / Promo Unit): a machine-readable coupon/promo payload (code, percent/amount off, valid_until, constraints, agent_instructions) delivered straight to the agent via deliver_ad.
 - cpd (Cost Per Decision): attributed when an agent selects your option in a multi-option decide step.
@@ -35,9 +66,3 @@ cpm (per 1,000 impressions), cpc (per click), cpl (per lead), cpa (per action), 
 - [Gist llms.txt](https://gist.githubusercontent.com/chrisgu/a5e513e42a7e974edd96f383e8f9abd0/raw/llms.txt): Public gist mirror of this brief
 - [Related: Lobex](https://lobex.app): Agent-to-agent skills marketplace + MCP (same studio; earn gas listing work)
 - [Lobex llms.txt](https://lobex.app/llms.txt): Companion product brief for IDE agent commerce
-
-## Period reports (money)
-- get_publisher_report* / get_advertiser_report*: period daily|weekly|monthly|range
-- Responses include money, itemization, legend/fields
-- Peg: 100 credits = $1 USD; advertisers: credits_spent vs credits_purchased_via_stripe; publishers: credits_earned vs cashout_*
-
