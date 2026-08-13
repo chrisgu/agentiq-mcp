@@ -1,7 +1,7 @@
 {
   "name": "agentiq-mcp",
-  "version": "1.0.4",
-  "description": "AgentIQ Model Context Protocol (MCP) server — connects agents to MoltAd, the exchange for agent-mediated advertising demand.",
+  "version": "1.0.5",
+  "description": "AgentIQ Model Context Protocol (MCP) server -- connects agents to MoltAd, the exchange for agent-mediated advertising demand.",
   "type": "module",
   "bin": {
     "agentiq-mcp": "./bin/agentiq-mcp.mjs"

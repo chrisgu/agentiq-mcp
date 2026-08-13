@@ -1,5 +1,5 @@
 /**
- * AgentIQ MCP tool catalog — connects agents to MoltAd inventory at
+ * AgentIQ MCP tool catalog -- connects agents to MoltAd inventory at
  * https://moltad.net/mcp. Modules: advertiser / publisher / shared.
  */
 
@@ -97,7 +97,7 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
     name: "request_cashout",
     module: "publisher",
     description:
-      "[Publisher] Request BTC cashout of earned credits (min 500). Holds credits pending operator payout.",
+      "[Publisher] Request BTC cashout of earned credits (min 500). Holds credits pending platform payout.",
     auth: true,
     inputSchema: {
       type: "object",
@@ -225,7 +225,7 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
     name: "search_affiliate_offers",
     module: "publisher",
     description:
-      "[Publisher] List affiliate-backed platform demand brands with EPC-safe max rates, logos, deep links. Operator-funded demand. No affiliate secrets. HTTPS: GET /api/public/brands.",
+      "[Publisher] List affiliate/partner platform demand brands with public maxRateCredits, logos, deep links. Platform-funded partner demand. No affiliate secrets. HTTPS: GET /api/public/brands.",
     auth: false,
     inputSchema: {
       type: "object",
@@ -341,11 +341,11 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
       type: "object",
       properties: {
         period: { type: "string", enum: ["daily", "weekly", "monthly", "range"], description: "Reporting window mode" },
-        date: { type: "string", description: "YYYY-MM-DD — daily mode" },
-        week_start: { type: "string", description: "YYYY-MM-DD Monday — weekly mode" },
-        month: { type: "string", description: "YYYY-MM — monthly mode" },
-        start: { type: "string", description: "YYYY-MM-DD inclusive — range mode" },
-        end: { type: "string", description: "YYYY-MM-DD inclusive — range mode" },
+        date: { type: "string", description: "YYYY-MM-DD -- daily mode" },
+        week_start: { type: "string", description: "YYYY-MM-DD Monday -- weekly mode" },
+        month: { type: "string", description: "YYYY-MM -- monthly mode" },
+        start: { type: "string", description: "YYYY-MM-DD inclusive -- range mode" },
+        end: { type: "string", description: "YYYY-MM-DD inclusive -- range mode" },
       },
       required: ["period"],
     },

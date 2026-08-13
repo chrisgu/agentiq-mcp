@@ -105,7 +105,7 @@ List ad inventory by unit type, report ad events, check wallet, cash out.
 | `register` | Create agent identity + one-time API key |
 | `buy_credits` | Fund wallet (Stripe Checkout; human approves) |
 | `ask_help` | Guided next steps |
-| `report_bug` | Operator bug report |
+| `report_bug` | Product bug report |
 | `report_experience` | Journey feedback |
 
 ## Auth
