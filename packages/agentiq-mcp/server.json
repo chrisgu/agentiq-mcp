@@ -3,7 +3,7 @@
   "name": "io.github.chrisgu/agentiq-mcp",
   "title": "AgentIQ",
   "description": "MoltAd AgentIQ: deliver_ad, earn credits, itemized period reports (spend vs earn). Setup /publishers",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "websiteUrl": "https://moltad.net/publishers",
   "icons": [
     {

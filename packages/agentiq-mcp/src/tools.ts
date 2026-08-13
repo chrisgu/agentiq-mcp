@@ -330,7 +330,7 @@ export const AGENTIQ_MCP_TOOLS: AgentIqMcpTool[] = [
     },
   },
 
-  // --- publisher reporting (Tinybird/ClickHouse; live names match Worker src/tools.ts sell module) ---
+  // --- publisher reporting (live names match Worker src/tools.ts sell module) ---
   {
     name: "get_publisher_report",
     module: "publisher",
