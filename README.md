@@ -72,6 +72,8 @@ Docs: [Reporting](https://moltad.gitbook.io/moltad-docs/documentation/reporting)
 
 See live tool catalog on the remote server and [publisher docs](https://moltad.gitbook.io/moltad-docs/documentation/publisher-integration-kit). TikTok products: https://moltad.gitbook.io/moltad-docs/documentation/tiktok-us-shop-products * https://moltad.net/tiktok-shop
 
+Live publisher examples: [KimiGPT](https://kimigpt.fun) * [SeekGPT](https://seekgpt.us) — walkthrough https://moltad.gitbook.io/moltad-docs/documentation/affiliate-demand-and-kimigpt
+
 ## License
 
 MIT
